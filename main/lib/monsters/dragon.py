@@ -145,6 +145,7 @@ class Dragon(pg.sprite.Sprite):
             self.image = self.rstatusani[self.status][self.cf]
             
         self.game.screen.blit(self.image,self.rect)
+        print(self.rect.y)
         self.mask = pg.mask.from_surface(self.image)
 
     def update_status(self):
@@ -188,7 +189,7 @@ class Dragon(pg.sprite.Sprite):
         
         # 创建攻击圆形范围
         attack_center = self.rect.center
-        attack_radius = self.atk1_range/2
+        attack_radius = self.atk1_range
         
         # 计算玩家中心点是否在攻击圆内
         player_center = self.game.player.rect.center
@@ -295,7 +296,6 @@ class Dragon(pg.sprite.Sprite):
         dist = self.check_player_distance()
         if dist > self.notice_radius:
             dx = 0
-            dy = 0
         self.rect.x += dx
         self.rect.y += dy
 
@@ -312,6 +312,7 @@ class Dragon(pg.sprite.Sprite):
         self.update_position()
         self.attack()
         self.blood.update()
+        MOD.ensure_entity_in_screen(self)
 
 class Fireball(pg.sprite.Sprite):
     def __init__(self,monster):

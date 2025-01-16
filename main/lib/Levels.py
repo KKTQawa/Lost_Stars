@@ -12,6 +12,7 @@ from lib.monsters.Warrant import Warrant
 from lib.monsters.zhiyin_box import Box
 from lib.monsters.dragon import Dragon
 from lib.monsters.prop import  precious_box,Luckycloud
+from lib.monsters.firegiant import Firegiant
 class Level:
     # 初始化关卡
     def __init__(self,game,num):
@@ -66,6 +67,7 @@ class Level:
         self.magic_rect = self.magic_arrow_ready_icon.get_rect()
 
         self.first_load_player=True
+        self.first_load_player_status=True
         self.is_display_rect_borders=False
         self.is_display_player_position=False
         self.backgroundimg = pg.image.load(STARTMENU_BACKGROUND).convert_alpha()
@@ -116,6 +118,11 @@ class Level:
                             MOD.set_position(dragon, rect_x, rect_y)
                             self.enemies.add(dragon)
                             self.boss = dragon
+                        elif tiles.TILES[tile]["name"] == "firegiant":
+                            firegiant = Firegiant(self)
+                            MOD.set_position(firegiant, rect_x, rect_y)
+                            self.enemies.add(firegiant)
+                            self.boss = firegiant
                     elif tiles.TILES[tile]["type"]=="decoration":
                         self.decoration.add(tilesprite)
                     elif tiles.TILES[tile]["type"]=="object":
@@ -206,7 +213,7 @@ class Level:
         pg.draw.rect(self.screen,RED,(HP_RECT_X+WIDTH/2,HP_RECT_Y,self.boss_hp_w,HP_BAR_HEIGHT))
         self.boss_hp_text_font=pg.font.Font(FONT,25)
         self.boss_hp_text=self.boss_hp_text_font.render("{:.2f}/{}".format(self.boss.hp,self.boss.max_hp),True,WHITE)
-        self.boss_hp_title=self.boss_hp_text_font.render("DRAGON HP:",True,WHITE)
+        self.boss_hp_title=self.boss_hp_text_font.render("BOSS HP:",True,WHITE)
         self.game.screen.blit(self.boss_hp_title,(HP_RECT_X+WIDTH/2-50,HP_RECT_Y))
         self.game.screen.blit(self.boss_hp_text,(HP_RECT_X+WIDTH/2+HP_BAR_WIDTH/2,HP_RECT_Y))
 
@@ -216,6 +223,16 @@ class Level:
         self.player_position_text=self.player_position_text_font.render(f"(x: {self.player.rect.x}, y: {self.player.rect.y})",True,WHITE)
         self.game.screen.blit(self.player_position_text,(10,MP_RECT_Y+MP_BAR_HEIGHT+40))
 
+    def reset_player_status(self):
+        if self.first_load_player_status:
+            self.player.lv = self.game.player_lv
+            self.player.max_hp = MAXHP * (1 + HPRATE_PER_LV * (self.player.lv - 1))
+            self.player.max_mp = MAXMP * (1 + MPRATE_PER_LV * (self.player.lv - 1))
+            self.player.atk = ATK_PER_FAMRE * (1 + ATKRATE_PER_LV * (self.player.lv - 1))
+            self.player.hp = self.player.max_hp
+            self.player.mp = self.player.max_mp
+            self.first_load_player_status=False
+        
     # 游戏结束
     def gameover(self):
         text = pg.font.Font(FONT3, 200)
@@ -426,6 +443,7 @@ class Level:
     def run(self):
         self.playing = True
         while self.playing:
+            self.reset_player_status()
             # 控制游戏速度
             self.game.clock.tick(FPS)
             # 获取事件
@@ -454,6 +472,7 @@ class Level:
                 self.game.ispaused = False
             keys = pg.key.get_pressed()
             mouses = pg.mouse.get_pressed()
+
             self.update(keys, mouses)
             self.draw()
             pg.display.flip()
@@ -521,9 +540,9 @@ class Level:
         self.game.screen.blit(self.player.image, self.camera.apply(self.player))
         # 绘制敌人
         for enemy in list(self.enemies):  # 使用list创建副本来遍历
-            enemy.blood.update()
             if enemy.active:
                 self.game.screen.blit(enemy.image, self.camera.apply(enemy))
+                enemy.blood.update()
         # 画npc
         for sprite in self.npcs:
             self.game.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -713,7 +732,7 @@ class Eilin(Npc):
 
     def load_frames(self):
         for i in range(self.framenums):
-            img = pg.image.load(f"{self.path}\\Idle{i+1}.png").convert_alpha()
+            img = pg.image.load(f"{self.path}/Idle{i+1}.png").convert_alpha()
             img = pg.transform.scale(img, (80, 96))
             self.frames.append(img)
 
@@ -741,7 +760,7 @@ class Renault(Npc):
 
     def load_frames(self):
         for i in range(self.framenums):
-            img = pg.image.load(f"{self.path}\\Idle{i+1}.png").convert_alpha()
+            img = pg.image.load(f"{self.path}/Idle{i+1}.png").convert_alpha()
             img = pg.transform.scale(img, (80, 96))
             self.frames.append(img)
     
