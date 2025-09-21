@@ -1,3 +1,0 @@
-- 此项目为多人协作。
-- 欢迎访问https://github.com/NightRain5212/ECNU2024_pygame查看NightRain5212（总策划）的主页
-- 声明：项目中一部分素材为原创，但更多的还是东拼西凑的，仅用于学习参考！
